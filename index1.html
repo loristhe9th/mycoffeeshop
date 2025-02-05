@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coffee Shop Management System</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Color Variables and Base Styles */
+    :root {
+      --primary-color: #FFA500; /* Orange */
+      --secondary-color: #007BFF; /* Blue */
+      --accent-color: #28a745; /* Green */
+      --background-color: #f5f5f5;
+      --text-color: #333;
+      --card-bg: #fff;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--primary-color), #ff7f00);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+    header img {
+      height: 60px;
+      margin-right: 20px;
+    }
+    header h1 {
+      font-size: 2rem;
+    }
+    /* Navigation */
+    nav {
+      background-color: var(--secondary-color);
+      padding: 12px 20px;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 30px;
+      transition: background-color 0.3s ease;
+    }
+    nav ul li a:hover {
+      background-color: #0056b3;
+    }
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 5px;
+    }
+    /* Cards */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      padding: 20px;
+      margin-bottom: 30px;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    .card h3 {
+      margin-bottom: 15px;
+      color: var(--accent-color);
+    }
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      margin-bottom: 20px;
+    }
+    table th, table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    table th {
+      background-color: #f0f0f0;
+    }
+    table tr:hover {
+      background-color: #f9f9f9;
+    }
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      background-color: var(--accent-color);
+      color: #fff;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      font-weight: 500;
+    }
+    .btn:hover {
+      background-color: #218838;
+    }
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .warning {
+      color: red;
+      font-weight: bold;
+    }
+    /* Section Visibility & Animations */
+    .section {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+    .section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Chart Canvas Styling */
+    .chart-container {
+      position: relative;
+      margin: auto;
+      height: 300px;
+      width: 100%;
+    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav ul {
+        flex-direction: column;
+        align-items: center;
+      }
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      header img {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>Coffee Shop</h1>
+  </header>
+  
+  <!-- Navigation -->
+  <nav>
+    <ul>
+      <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+      <li><a href="#" onclick="showSection('orders')">Orders</a></li>
+      <li><a href="#" onclick="showSection('inventory')">Inventory</a></li>
+      <li><a href="#" onclick="showSection('employee')">Employee Performance</a></li>
+      <li><a href="#" onclick="showSection('customer')">Customer Analytics</a></li>
+    </ul>
+  </nav>
+  
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section active">
+      <h2>Dashboard</h2>
+      <div class="card">
+        <h3>Today's Revenue</h3>
+        <p>Compared to yesterday: <strong>+15%</strong></p>
+        <p>Total Revenue: <strong>$1,000</strong></p>
+      </div>
+      <div class="card">
+        <h3>Pending Orders</h3>
+        <p><strong>5 orders</strong> waiting to be prepared</p>
+      </div>
+      <div class="card">
+        <h3>Peak Hours</h3>
+        <p>8:00 AM - 10:00 AM and 4:00 PM - 6:00 PM</p>
+      </div>
+      <div class="card">
+        <h3>Hourly Revenue Chart</h3>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Order Volume Chart</h3>
+        <div class="chart-container">
+          <canvas id="orderVolumeChart"></canvas>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Orders Section -->
+    <section id="orders" class="section">
+      <h2>Order Management</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Time</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody">
+          <tr>
+            <td>#001</td>
+            <td>08:15 AM</td>
+            <td>Latte</td>
+            <td>2</td>
+            <td>Cash</td>
+            <td>Pending</td>
+          </tr>
+          <tr>
+            <td>#002</td>
+            <td>08:30 AM</td>
+            <td>Espresso</td>
+            <td>1</td>
+            <td>Card</td>
+            <td>Completed</td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn" onclick="toggleOrderForm()">Add New Order</button>
+      <div id="orderForm" style="display:none; margin-top:20px;">
+        <h3>Add New Order</h3>
+        <div class="form-group">
+          <label for="menuItem">Select Item from Menu:</label>
+          <input type="text" id="menuItem" placeholder="Enter item name..." list="menuList">
+          <datalist id="menuList">
+            <option value="Latte">
+            <option value="Cappuccino">
+            <option value="Espresso">
+            <option value="Americano">
+            <option value="Mocha">
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label for="price">Price ($):</label>
+          <input type="number" id="price" placeholder="Enter price">
+        </div>
+        <div class="form-group">
+          <label for="quantity">Quantity:</label>
+          <input type="number" id="quantity" placeholder="Enter quantity">
+        </div>
+        <div class="form-group">
+          <label for="paymentMethod">Payment Method:</label>
+          <select id="paymentMethod">
+            <option value="cash">Cash</option>
+            <option value="card">Card</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="promotion">Promotion Code (if any):</label>
+          <input type="text" id="promotion" placeholder="Enter promotion code">
+        </div>
+        <button class="btn" onclick="completeOrder()">Submit Order</button>
+      </div>
+    </section>
+    
+    <!-- Inventory Section -->
+    <section id="inventory" class="section">
+      <h2>Inventory Management</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Ingredient</th>
+            <th>Current Stock</th>
+            <th>Reorder Level</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sugar</td>
+            <td>2 kg</td>
+            <td>1 kg</td>
+            <td><span class="warning">Low Stock</span></td>
+          </tr>
+          <tr>
+            <td>Milk</td>
+            <td>5 liters</td>
+            <td>2 liters</td>
+            <td>OK</td>
+          </tr>
+          <tr>
+            <td>Coffee Beans</td>
+            <td>1 kg</td>
+            <td>0.5 kg</td>
+            <td><span class="warning">Low Stock</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn" onclick="toggleInventoryForm()">Restock Inventory</button>
+      <div id="inventoryForm" style="display:none; margin-top:20px;">
+        <h3>Restock Inventory</h3>
+        <div class="form-group">
+          <label for="ingredientName">Ingredient Name:</label>
+          <input type="text" id="ingredientName" placeholder="Enter ingredient name...">
+        </div>
+        <div class="form-group">
+          <label for="ingredientQuantity">Quantity:</label>
+          <input type="number" id="ingredientQuantity" placeholder="Enter quantity">
+        </div>
+        <div class="form-group">
+          <label for="ingredientPrice">Purchase Price ($):</label>
+          <input type="number" id="ingredientPrice" placeholder="Enter purchase price">
+        </div>
+        <button class="btn" onclick="submitInventory()">Submit Restock</button>
+      </div>
+    </section>
+    
+    <!-- Employee Performance Section -->
+    <section id="employee" class="section">
+      <h2>Employee Performance</h2>
+      <div class="form-group">
+        <label for="employeeSelect">Select Employee or Shift:</label>
+        <select id="employeeSelect" onchange="updateEmployeePerformance()">
+          <option value="all">All</option>
+          <option value="employee1">Employee 1</option>
+          <option value="employee2">Employee 2</option>
+          <option value="employee3">Employee 3</option>
+          <option value="shiftMorning">Morning Shift</option>
+          <option value="shiftAfternoon">Afternoon Shift</option>
+        </select>
+      </div>
+      <div class="card">
+        <h3>Orders Processed</h3>
+        <p><strong>25 orders</strong> processed today</p>
+      </div>
+      <div class="card">
+        <h3>Average Time per Order</h3>
+        <p><strong>3 minutes</strong> on average</p>
+      </div>
+      <div class="card">
+        <h3>Employee Ranking</h3>
+        <div class="chart-container">
+          <canvas id="employeeChart"></canvas>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Customer Analytics Section -->
+    <section id="customer" class="section">
+      <h2>Customer Analytics</h2>
+      <div class="card">
+        <h3>Customer Statistics</h3>
+        <p>Analyze customer demographics, purchase frequency, and trends.</p>
+        <div class="chart-container">
+          <canvas id="genderChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="ageChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Top 10 Loyal Customers</h3>
+        <ol>
+          <li>Customer A</li>
+          <li>Customer B</li>
+          <li>Customer C</li>
+          <li>Customer D</li>
+          <li>Customer E</li>
+          <li>Customer F</li>
+          <li>Customer G</li>
+          <li>Customer H</li>
+          <li>Customer I</li>
+          <li>Customer J</li>
+        </ol>
+      </div>
+      <button class="btn" onclick="toggleCampaignForm()">Create Promotion Campaign</button>
+      <div id="campaignForm" style="display:none; margin-top:20px;">
+        <h3>Create Promotion Campaign</h3>
+        <div class="form-group">
+          <label for="customerGroup">Select Customer Group:</label>
+          <select id="customerGroup">
+            <option value="vip">VIP</option>
+            <option value="regular">Regular</option>
+            <option value="new">New</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="discount">Discount (%):</label>
+          <input type="number" id="discount" placeholder="Enter discount percentage">
+        </div>
+        <button class="btn" onclick="createCampaign()">Launch Campaign</button>
+      </div>
+    </section>
+  </div>
+  
+  <!-- JavaScript for Section Toggling and Chart Initialization -->
+  <script>
+    // Section toggle functionality
+    function showSection(sectionId) {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(section => section.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+    
+    // Order form toggle and submission
+    function toggleOrderForm() {
+      const form = document.getElementById('orderForm');
+      form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    }
+    function completeOrder() {
+      alert('Order submitted successfully!');
+      // Implement order submission logic here
+    }
+    
+    // Inventory form toggle and submission
+    function toggleInventoryForm() {
+      const form = document.getElementById('inventoryForm');
+      form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    }
+    function submitInventory() {
+      alert('Inventory restocked successfully!');
+      // Implement inventory restock logic here
+    }
+    
+    // Campaign form toggle and submission
+    function toggleCampaignForm() {
+      const form = document.getElementById('campaignForm');
+      form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    }
+    function createCampaign() {
+      alert('Promotion campaign launched successfully!');
+      // Implement campaign creation logic here
+    }
+    
+    // Employee performance update (dummy implementation)
+    function updateEmployeePerformance() {
+      console.log("Updating employee performance data...");
+      // Implement data update logic based on the selected employee or shift
+    }
+    
+    // Initialize Charts using Chart.js
+    window.onload = function() {
+      // Revenue Chart (Line Chart)
+      var ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+      new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+          labels: ['6 AM', '8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM'],
+          datasets: [{
+            label: 'Revenue ($)',
+            data: [100, 250, 300, 350, 400, 380, 420, 390],
+            backgroundColor: 'rgba(255,165,0,0.2)',
+            borderColor: 'rgba(255,165,0,1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+      
+      // Order Volume Chart (Bar Chart)
+      var ctxOrderVolume = document.getElementById('orderVolumeChart').getContext('2d');
+      new Chart(ctxOrderVolume, {
+        type: 'bar',
+        data: {
+          labels: ['6 AM', '8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM'],
+          datasets: [{
+            label: 'Orders',
+            data: [3, 5, 8, 6, 7, 10, 9, 4],
+            backgroundColor: 'rgba(0,123,255,0.6)',
+            borderColor: 'rgba(0,123,255,1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+      
+      // Employee Performance Chart (Bar Chart)
+      var ctxEmployee = document.getElementById('employeeChart').getContext('2d');
+      new Chart(ctxEmployee, {
+        type: 'bar',
+        data: {
+          labels: ['Employee 1', 'Employee 2', 'Employee 3'],
+          datasets: [{
+            label: 'Orders Processed',
+            data: [30, 25, 20],
+            backgroundColor: 'rgba(40,167,69,0.6)',
+            borderColor: 'rgba(40,167,69,1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 5 } }
+          }
+        }
+      });
+      
+      // Gender Distribution Chart (Pie Chart)
+      var ctxGender = document.getElementById('genderChart').getContext('2d');
+      new Chart(ctxGender, {
+        type: 'pie',
+        data: {
+          labels: ['Male', 'Female', 'Other'],
+          datasets: [{
+            data: [60, 35, 5],
+            backgroundColor: [
+              'rgba(0,123,255,0.7)',
+              'rgba(255,99,132,0.7)',
+              'rgba(255,205,86,0.7)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+      
+      // Age Distribution Chart (Bar Chart)
+      var ctxAge = document.getElementById('ageChart').getContext('2d');
+      new Chart(ctxAge, {
+        type: 'bar',
+        data: {
+          labels: ['<20', '20-30', '30-40', '40-50', '>50'],
+          datasets: [{
+            label: 'Number of Customers',
+            data: [15, 40, 25, 10, 5],
+            backgroundColor: 'rgba(255,159,64,0.6)',
+            borderColor: 'rgba(255,159,64,1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 5 } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
